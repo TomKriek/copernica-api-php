@@ -92,23 +92,29 @@ class CopernicaAPI
     }
 
     /**
+     * @param array $data
      * @return int|mixed
      * @throws BadCopernicaRequest
      */
-    public function post()
+    public function post(array $data)
     {
         $this->method = 'POST';
+
+        $this->setData($data);
 
         return $this->doRequest();
     }
 
     /**
+     * @param array $data
      * @return int|mixed
      * @throws BadCopernicaRequest
      */
-    public function put()
+    public function put(array $data)
     {
         $this->method = 'PUT';
+
+        $this->setData($data);
 
         return $this->doRequest();
     }
@@ -268,7 +274,7 @@ class CopernicaAPI
 
             if (count($created) !== 0) {
                 // Creation was succesful return id
-                return 0;
+                return (int) array_shift($created);
             }
 
             $decoded = json_decode($response->getBody()->getContents());
