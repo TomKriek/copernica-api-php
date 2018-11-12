@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="DCS">
+    <description>The Dropcart Style coding standard.</description>
+    <rule ref="PSR1"/>
+    <rule ref="PSR2"/>
+
+    <file>src/</file>
+
+    <exclude-pattern>vendor</exclude-pattern>
+</ruleset>
