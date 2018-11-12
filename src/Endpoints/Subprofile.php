@@ -34,8 +34,8 @@ class Subprofile
     {
         $this->api->setExtra($name);
 
-        if (count($arguments) > 0) {
-            $this->api->setParams($arguments);
+        if (count($arguments) === 1) {
+            $this->api->setParams(array_shift($arguments));
         }
 
         return $this->api;

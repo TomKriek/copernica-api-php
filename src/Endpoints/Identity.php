@@ -30,10 +30,6 @@ class Identity
     {
         $this->api->setExtra($name);
 
-        if (count($arguments) > 0) {
-            $this->api->setParams($arguments);
-        }
-
         return $this->api;
     }
 }

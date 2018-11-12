@@ -3,6 +3,7 @@
 namespace TomKriek\CopernicaAPI\Traits;
 
 use TomKriek\CopernicaAPI\CopernicaAPI;
+use TomKriek\CopernicaAPI\Exceptions\BadCopernicaRequest;
 
 trait Methods
 {
@@ -19,7 +20,7 @@ trait Methods
 
     /**
      * @return int|mixed
-     * @throws \TomKriek\Exceptions\BadCopernicaRequest
+     * @throws BadCopernicaRequest
      */
     public function get()
     {
@@ -32,7 +33,7 @@ trait Methods
     /**
      * @param array $data
      * @return int|mixed
-     * @throws \TomKriek\Exceptions\BadCopernicaRequest
+     * @throws BadCopernicaRequest
      */
     public function post(array $data)
     {
@@ -47,7 +48,7 @@ trait Methods
     /**
      * @param array $data
      * @return int|mixed
-     * @throws \TomKriek\Exceptions\BadCopernicaRequest
+     * @throws BadCopernicaRequest
      */
     public function put(array $data)
     {
@@ -61,7 +62,7 @@ trait Methods
 
     /**
      * @return int|mixed
-     * @throws \TomKriek\Exceptions\BadCopernicaRequest
+     * @throws BadCopernicaRequest
      * @throws \UnexpectedValueException
      */
     public function delete()

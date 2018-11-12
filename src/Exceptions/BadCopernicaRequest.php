@@ -1,6 +1,6 @@
 <?php
 
-namespace TomKriek\Exceptions;
+namespace TomKriek\CopernicaAPI\Exceptions;
 
 class BadCopernicaRequest extends \Exception
 {

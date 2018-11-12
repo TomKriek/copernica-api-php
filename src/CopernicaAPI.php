@@ -6,7 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Exception\GuzzleException;
-use TomKriek\Exceptions\BadCopernicaRequest;
+use TomKriek\CopernicaAPI\Exceptions\BadCopernicaRequest;
 
 /**
  * Class CopernicaAPI
@@ -59,6 +59,15 @@ class CopernicaAPI
 
     /* @var array $data */
     private $data;
+
+    /* @var int $limit */
+    private $limit;
+
+    /* @var boolean $total  */
+    private $total;
+
+    /* @var int $start */
+    private $start;
 
     public function __construct($token)
     {
@@ -114,6 +123,64 @@ class CopernicaAPI
         $this->params = $params;
     }
 
+    /**
+     * @param int $limit
+     * @return CopernicaAPI
+     */
+    public function limit($limit = null)
+    {
+        $this->limit = $limit;
+
+        return $this;
+    }
+
+    /**
+     * @param int $start
+     * @return CopernicaAPI
+     */
+    public function start($start = null)
+    {
+        $this->start = $start;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $total
+     * @return CopernicaAPI
+     */
+    public function total($total = true)
+    {
+        $this->total = $total;
+
+        return $this;
+    }
+
+    public function buildQuery()
+    {
+        $parts = [];
+
+        $parts['access_token'] = $this->token;
+
+        if (null !== $this->start) {
+            $parts['start'] = $this->start;
+        }
+
+        if (null !== $this->limit) {
+            $parts['limit'] = $this->limit;
+        }
+
+        if (null !== $this->total) {
+            $parts['total'] = $this->total;
+        }
+
+        if (count($this->getParams()) > 0) {
+            $parts = array_merge($parts, $this->getParams());
+        }
+
+        return http_build_query($parts);
+    }
+
     public function getParams()
     {
         if (null === $this->params) {
@@ -163,7 +230,7 @@ class CopernicaAPI
 
         $url = implode('/', $parts);
 
-        $query = http_build_query(array('access_token' => $this->token) + $this->getParams());
+        $query = $this->buildQuery();
 
         return new Uri($url . '?' . $query);
     }
@@ -224,12 +291,12 @@ class CopernicaAPI
      */
     public function __call($name, $arguments)
     {
-        $fqcn = '\TomKriek\CopernicaAPI\Endpoints\\'. ucfirst($name);
+        $fqcn = '\TomKriek\CopernicaAPI\Endpoints\\' . ucfirst($name);
 
         $exists = class_exists($fqcn);
 
         if (!$exists) {
-            throw new \BadMethodCallException("Endpoint '". ucfirst($name) ."' does not exist.");
+            throw new \BadMethodCallException("Endpoint '" . ucfirst($name) . "' does not exist.");
         }
 
         // Different behaviour for some endpoints

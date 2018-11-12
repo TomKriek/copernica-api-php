@@ -4,6 +4,7 @@ namespace TomKriek\CopernicaAPI\Endpoints;
 
 use TomKriek\CopernicaAPI\CopernicaAPI;
 use TomKriek\CopernicaAPI\Traits\Methods;
+use TomKriek\CopernicaAPI\Traits\Parameters;
 
 /**
  * Class Database
@@ -22,6 +23,7 @@ class Database
 {
 
     use Methods;
+    use Parameters;
 
     /* @var CopernicaAPI $api */
     private $api;
@@ -44,8 +46,8 @@ class Database
             $this->api->setExtra($name);
         }
 
-        if (count($arguments) > 0) {
-            $this->api->setParams($arguments);
+        if (count($arguments) === 1) {
+            $this->api->setParams(array_shift($arguments));
         }
 
         return $this->api;
