@@ -19,6 +19,7 @@ trait Methods
 
     /**
      * @return int|mixed
+     * @throws \TomKriek\Exceptions\BadCopernicaRequest
      */
     public function get()
     {
@@ -29,7 +30,9 @@ trait Methods
     }
 
     /**
+     * @param array $data
      * @return int|mixed
+     * @throws \TomKriek\Exceptions\BadCopernicaRequest
      */
     public function post(array $data)
     {
@@ -42,7 +45,9 @@ trait Methods
     }
 
     /**
+     * @param array $data
      * @return int|mixed
+     * @throws \TomKriek\Exceptions\BadCopernicaRequest
      */
     public function put(array $data)
     {
@@ -56,14 +61,16 @@ trait Methods
 
     /**
      * @return int|mixed
+     * @throws \TomKriek\Exceptions\BadCopernicaRequest
+     * @throws \UnexpectedValueException
      */
     public function delete()
     {
         /* @var CopernicaAPI $api */
         $api = $this->api;
 
-        if (!in_array($api->getResource(), $this->allow_delete_endpoints)) {
-            throw new \UnexpectedValueException("Cannot delete this resource: ". $api->getResource());
+        if (!in_array($api->getResource(), $this->allow_delete_endpoints, true)) {
+            throw new \UnexpectedValueException('Cannot delete this resource: ' . $api->getResource());
         }
 
         return $api->delete();

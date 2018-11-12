@@ -13,22 +13,22 @@ use TomKriek\Exceptions\BadCopernicaRequest;
  * @package TomKriek\CopernicaAPI
  * @see https://www.copernica.com/nl/documentation/rest-api for complete list of functionalities
  *
- * @method \TomKriek\CopernicaAPI\Endpoints\Collection collection(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Database database(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Datarequest datarequest(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Email email(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Emailingdocument emailingdocument(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Identity identity(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Logfiles logfiles(string $name)
- * @method \TomKriek\CopernicaAPI\Endpoints\Message message(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Minirule minirule(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Miniview miniview(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Profile profile(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Rule rule(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Subprofile subprofile(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\Tags tags(string $tag)
- * @method \TomKriek\CopernicaAPI\Endpoints\Template template(int $id)
- * @method \TomKriek\CopernicaAPI\Endpoints\View view(int $id)
+ * @method Endpoints\Collection collection(int $id)
+ * @method Endpoints\Database database(int $id)
+ * @method Endpoints\Datarequest datarequest(int $id)
+ * @method Endpoints\Email email(int $id)
+ * @method Endpoints\Emailingdocument emailingdocument(int $id)
+ * @method Endpoints\Identity identity(int $id)
+ * @method Endpoints\Logfiles logfiles(string $name)
+ * @method Endpoints\Message message(int $id)
+ * @method Endpoints\Minirule minirule(int $id)
+ * @method Endpoints\Miniview miniview(int $id)
+ * @method Endpoints\Profile profile(int $id)
+ * @method Endpoints\Rule rule(int $id)
+ * @method Endpoints\Subprofile subprofile(int $id)
+ * @method Endpoints\Tags tags(string $tag)
+ * @method Endpoints\Template template(int $id)
+ * @method Endpoints\View view(int $id)
  */
 class CopernicaAPI
 {
@@ -207,12 +207,12 @@ class CopernicaAPI
             $decoded = json_decode($response->getBody()->getContents());
 
             if (json_last_error() !== 0) {
-                throw new \UnexpectedValueException("Json Error", json_last_error());
+                throw new \UnexpectedValueException('Json Error', json_last_error());
             }
 
             return $decoded;
         } catch (GuzzleException $exception) {
-            throw new BadCopernicaRequest("Something went wrong.", 0, $exception);
+            throw new BadCopernicaRequest('Something went wrong.', 0, $exception);
         }
     }
 
@@ -220,6 +220,7 @@ class CopernicaAPI
      * @param $name
      * @param $arguments
      * @throws \Exception
+     * @return object
      */
     public function __call($name, $arguments)
     {
@@ -228,7 +229,7 @@ class CopernicaAPI
         $exists = class_exists($fqcn);
 
         if (!$exists) {
-            throw new \Exception("Endpoint '". ucfirst($name) ."' does not exist.");
+            throw new \BadMethodCallException("Endpoint '". ucfirst($name) ."' does not exist.");
         }
 
         // Different behaviour for some endpoints
