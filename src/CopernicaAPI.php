@@ -5,6 +5,7 @@ namespace TomKriek\CopernicaAPI;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use TomKriek\CopernicaAPI\Exceptions\BadCopernicaRequest;
 
@@ -69,11 +70,13 @@ class CopernicaAPI
     /* @var int $start */
     private $start;
 
-    public function __construct($token)
+    public function __construct($token, $debug = false)
     {
         if (null === $this->http_client) {
             $this->http_client = new Client([
-                'base_uri' => self::API_GATEWAY . '/' . self::VERSION . '/'
+                'base_uri' => self::API_GATEWAY . '/' . self::VERSION . '/',
+                'debug' => (bool) $debug,
+                'timeout' => 30
             ]);
         }
 
@@ -288,10 +291,6 @@ class CopernicaAPI
             $headers['Content-Type'] = 'application/json';
         }
 
-        if ($this->method === 'PUT') {
-            $headers['Content-Length'] = strlen($data);
-        }
-
         try {
             $uri = $this->buildURI();
 
@@ -313,6 +312,8 @@ class CopernicaAPI
             }
 
             return $decoded;
+        } catch (ClientException $exception) {
+            throw new BadCopernicaRequest('Client Exception', $exception->getCode(), $exception);
         } catch (GuzzleException $exception) {
             throw new BadCopernicaRequest('Something went wrong.', 0, $exception);
         }
@@ -346,7 +347,7 @@ class CopernicaAPI
             case 'something':
                 break;
             default:
-                $this->resource = $name;
+                $this->resource = $name . (isset($arguments[0]) ? '/'. $arguments[0] : '');
         }
 
         return new $fqcn($this);
