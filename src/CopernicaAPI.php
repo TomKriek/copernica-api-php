@@ -119,11 +119,17 @@ class CopernicaAPI
         return $this->doRequest();
     }
 
+    /**
+     * @param string $resource
+     */
     public function setResource($resource)
     {
         $this->resource = $resource;
     }
 
+    /**
+     * @param string $params
+     */
     public function setParams($params = null)
     {
         $this->params = $params;
@@ -162,6 +168,11 @@ class CopernicaAPI
         return $this;
     }
 
+    /**
+     * Build the query parameters to be appended to the request URL towards Copernica
+     *
+     * @return string
+     */
     public function buildQuery()
     {
         $parts = [];
@@ -187,6 +198,9 @@ class CopernicaAPI
         return http_build_query($parts);
     }
 
+    /**
+     * @return array
+     */
     public function getParams()
     {
         if (null === $this->params) {
@@ -196,16 +210,25 @@ class CopernicaAPI
         return $this->params;
     }
 
+    /**
+     * @return string
+     */
     public function getResource()
     {
         return $this->resource;
     }
 
+    /**
+     * @param string $extra
+     */
     public function setExtra($extra)
     {
         $this->extra = $extra;
     }
 
+    /**
+     * @return string
+     */
     public function getExtra()
     {
         return $this->extra;
@@ -222,6 +245,11 @@ class CopernicaAPI
         return $this->doRequest();
     }
 
+    /**
+     * Build complete URL to be used in the Request object
+     *
+     * @return Uri
+     */
     private function buildURI()
     {
         $parts = [
@@ -243,6 +271,7 @@ class CopernicaAPI
 
     /**
      * @return int|mixed
+     *
      * @throws BadCopernicaRequest
      */
     private function doRequest()
@@ -313,6 +342,8 @@ class CopernicaAPI
                 } else {
                     $this->resource = 'database/' . $arguments[0];
                 }
+                break;
+            case 'something':
                 break;
             default:
                 $this->resource = $name;

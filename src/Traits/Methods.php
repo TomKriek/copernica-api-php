@@ -40,9 +40,7 @@ trait Methods
         /* @var CopernicaAPI $api */
         $api = $this->api;
 
-        $api->setData($data);
-
-        return $api->post();
+        return $api->post($data);
     }
 
     /**
@@ -55,9 +53,7 @@ trait Methods
         /* @var CopernicaAPI $api */
         $api = $this->api;
 
-        $api->setData($data);
-
-        return $api->put();
+        return $api->put($data);
     }
 
     /**
