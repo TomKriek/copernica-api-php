@@ -3,7 +3,6 @@
 namespace TomKriek\CopernicaAPI\Endpoints;
 
 use TomKriek\CopernicaAPI\CopernicaAPI;
-use TomKriek\CopernicaAPI\Traits\Methods;
 
 /**
  * Class Database
@@ -11,31 +10,7 @@ use TomKriek\CopernicaAPI\Traits\Methods;
  *
  * @method CopernicaAPI conditions(array $parameters = [])
  */
-class Minirule
+class Minirule extends AbstractEndpoint
 {
 
-    use Methods;
-
-    /* @var CopernicaAPI $api */
-    private $api;
-
-    /**
-     * Database constructor.
-     * @param CopernicaAPI $api
-     */
-    public function __construct(CopernicaAPI $api)
-    {
-        $this->api = $api;
-    }
-
-    public function __call($name, $arguments)
-    {
-        $this->api->setExtra($name);
-
-        if (count($arguments) === 1) {
-            $this->api->setParams(array_shift($arguments));
-        }
-
-        return $this->api;
-    }
 }

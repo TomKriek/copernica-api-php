@@ -1,13 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace TomKriek\CopernicaAPI;
 
+use BadMethodCallException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use TomKriek\CopernicaAPI\Exceptions\BadCopernicaRequest;
+use UnexpectedValueException;
 
 /**
  * Class CopernicaAPI
@@ -16,6 +19,7 @@ use TomKriek\CopernicaAPI\Exceptions\BadCopernicaRequest;
  *
  * @method Endpoints\Collection collection(int $id)
  * @method Endpoints\Database database(int $id)
+ * @method Endpoints\Databases databases()
  * @method Endpoints\Datarequest datarequest(int $id)
  * @method Endpoints\Email email(int $id)
  * @method Endpoints\Emailingdocument emailingdocument(int $id)
@@ -35,10 +39,7 @@ class CopernicaAPI
 {
 
     /* @var string API_GATEWAY */
-    const API_GATEWAY = 'https://api.copernica.com';
-
-    /* @var string VERSION */
-    const VERSION = 'v1';
+    private const API_GATEWAY = 'https://api.copernica.com';
 
     /* @var string $token */
     private $token;
@@ -46,11 +47,14 @@ class CopernicaAPI
     /* @var string $method */
     private $method = 'GET';
 
+    /* @var string $version */
+    private $version;
+
     /* @var Client $http_client */
     private $http_client;
 
-    /* @var string $resource */
-    private $resource = '';
+    /* @var string $endpoint */
+    private $endpoint = '';
 
     /* @var string $extra */
     private $extra = '';
@@ -64,19 +68,21 @@ class CopernicaAPI
     /* @var int $limit */
     private $limit;
 
-    /* @var boolean $total  */
+    /* @var boolean $total */
     private $total;
 
     /* @var int $start */
     private $start;
 
-    public function __construct($token, $debug = false)
+    public function __construct(string $token, string $version = 'v1', bool $debug = false)
     {
+        $this->version = $version;
+
         if (null === $this->http_client) {
             $this->http_client = new Client([
-                'base_uri' => self::API_GATEWAY . '/' . self::VERSION . '/',
-                'debug' => (bool) $debug,
-                'timeout' => 30
+                'base_uri' => self::API_GATEWAY . '/' . $this->version . '/',
+                'debug'    => $debug,
+                'timeout'  => 30
             ]);
         }
 
@@ -123,17 +129,19 @@ class CopernicaAPI
     }
 
     /**
-     * @param string $resource
+     * @param string $name
      */
-    public function setResource($resource)
+    public function setEndpoint($name): void
     {
-        $this->resource = $resource;
+        $this->endpoint = $name;
     }
 
     /**
-     * @param string $params
+     * Setter for the parameters that will be used to build an query
+     *
+     * @param array $params
      */
-    public function setParams($params = null)
+    public function setParams(array $params): void
     {
         $this->params = $params;
     }
@@ -142,7 +150,7 @@ class CopernicaAPI
      * @param int $limit
      * @return CopernicaAPI
      */
-    public function limit($limit = null)
+    public function limit($limit = null): CopernicaAPI
     {
         $this->limit = $limit;
 
@@ -153,7 +161,7 @@ class CopernicaAPI
      * @param int $start
      * @return CopernicaAPI
      */
-    public function start($start = null)
+    public function start(int $start): CopernicaAPI
     {
         $this->start = $start;
 
@@ -164,7 +172,7 @@ class CopernicaAPI
      * @param bool $total
      * @return CopernicaAPI
      */
-    public function total($total = true)
+    public function total(bool $total = true): CopernicaAPI
     {
         $this->total = $total;
 
@@ -176,7 +184,7 @@ class CopernicaAPI
      *
      * @return string
      */
-    public function buildQuery()
+    public function buildQuery(): string
     {
         $parts = [];
 
@@ -204,7 +212,7 @@ class CopernicaAPI
     /**
      * @return array
      */
-    public function getParams()
+    public function getParams(): array
     {
         if (null === $this->params) {
             return [];
@@ -216,15 +224,15 @@ class CopernicaAPI
     /**
      * @return string
      */
-    public function getResource()
+    public function getEndpoint(): string
     {
-        return $this->resource;
+        return $this->endpoint;
     }
 
     /**
      * @param string $extra
      */
-    public function setExtra($extra)
+    public function setExtra($extra): void
     {
         $this->extra = $extra;
     }
@@ -232,7 +240,7 @@ class CopernicaAPI
     /**
      * @return string
      */
-    public function getExtra()
+    public function getExtra(): string
     {
         return $this->extra;
     }
@@ -253,16 +261,16 @@ class CopernicaAPI
      *
      * @return Uri
      */
-    private function buildURI()
+    private function buildURI(): Uri
     {
         $parts = [
             self::API_GATEWAY,
-            self::VERSION,
-            $this->resource,
+            $this->version,
+            $this->getEndpoint(),
         ];
 
-        if ($this->extra !== '') {
-            $parts[] = $this->extra;
+        if ($this->getExtra() !== '') {
+            $parts[] = $this->getExtra();
         }
 
         $url = implode('/', $parts);
@@ -273,20 +281,21 @@ class CopernicaAPI
     }
 
     /**
+     * Returns an integer on succesful creation for post methods and the response of the call on other methods
+     *
      * @return int|mixed
      *
      * @throws BadCopernicaRequest
      */
     private function doRequest()
     {
-        $headers = [];
-
         $data = null;
 
         if (null !== $this->getData()) {
             $data = json_encode($this->getData());
         }
 
+        $headers = [];
         if ($this->method === 'POST' || $this->method === 'PUT') {
             $headers['Content-Type'] = 'application/json';
         }
@@ -298,17 +307,16 @@ class CopernicaAPI
 
             $response = $this->http_client->send($request);
 
-            $created = $response->getHeader('X-Created');
+            $createdHeader = $response->getHeader('X-Created');
 
-            if (count($created) !== 0) {
-                // Creation was succesful return id
-                return (int) array_shift($created);
+            if (count($createdHeader) !== 0) {
+                return (int)array_shift($createdHeader);
             }
 
-            $decoded = json_decode($response->getBody()->getContents());
+            $decoded = json_decode($response->getBody()->getContents(), false);
 
             if (json_last_error() !== 0) {
-                throw new \UnexpectedValueException('Json Error', json_last_error());
+                throw new UnexpectedValueException('Json Error', json_last_error());
             }
 
             return $decoded;
@@ -322,8 +330,10 @@ class CopernicaAPI
     /**
      * @param $name
      * @param $arguments
-     * @throws \Exception
+     *
      * @return object
+     *
+     * @throws BadMethodCallException
      */
     public function __call($name, $arguments)
     {
@@ -332,23 +342,10 @@ class CopernicaAPI
         $exists = class_exists($fqcn);
 
         if (!$exists) {
-            throw new \BadMethodCallException("Endpoint '" . ucfirst($name) . "' does not exist.");
+            throw new BadMethodCallException("Endpoint '" . ucfirst($name) . "' does not exist.");
         }
 
-        // Different behaviour for some endpoints
-        switch ($name) {
-            case 'database':
-                if ($arguments[0] === 0) {
-                    $this->resource = 'databases';
-                } else {
-                    $this->resource = 'database/' . $arguments[0];
-                }
-                break;
-            case 'something':
-                break;
-            default:
-                $this->resource = $name . (isset($arguments[0]) ? '/'. $arguments[0] : '');
-        }
+        $this->setEndpoint($name . (isset($arguments[0]) ? '/' . $arguments[0] : ''));
 
         return new $fqcn($this);
     }
@@ -356,7 +353,7 @@ class CopernicaAPI
     /**
      * @return array
      */
-    public function getData()
+    public function getData(): array
     {
         if (null === $this->data) {
             return [];
@@ -368,7 +365,7 @@ class CopernicaAPI
     /**
      * @param array $data
      */
-    public function setData($data)
+    public function setData(array $data): void
     {
         $this->data = $data;
     }

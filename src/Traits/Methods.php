@@ -4,6 +4,7 @@ namespace TomKriek\CopernicaAPI\Traits;
 
 use TomKriek\CopernicaAPI\CopernicaAPI;
 use TomKriek\CopernicaAPI\Exceptions\BadCopernicaRequest;
+use UnexpectedValueException;
 
 trait Methods
 {
@@ -59,15 +60,15 @@ trait Methods
     /**
      * @return int|mixed
      * @throws BadCopernicaRequest
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      */
     public function delete()
     {
         /* @var CopernicaAPI $api */
         $api = $this->api;
 
-        if (!in_array($api->getResource(), $this->allow_delete_endpoints, true)) {
-            throw new \UnexpectedValueException('Cannot delete this resource: ' . $api->getResource());
+        if (!in_array($api->getEndpoint(), $this->allow_delete_endpoints, true)) {
+            throw new UnexpectedValueException('Cannot delete this resource');
         }
 
         return $api->delete();
